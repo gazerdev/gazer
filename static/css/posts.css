@@ -1,0 +1,9 @@
+.post-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+}
+
+.post {
+  margin: 5px;
+}

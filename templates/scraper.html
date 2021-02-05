@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>Gazer v0.0</title>
+
+        <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="static/favicon-16x16.png">
+        <link rel="manifest" href="/site.webmanifest">
+
+    </head>
+    <body>
+      <h1>Scraper</h1>
+
+      <h2>Status</h2>
+      Active: {{status.active}}<p>
+      Currently Downloading: {{status.current_tags}}<p>
+      Images Downloaded: {{status.images_downloaded}}<p>
+      Complete: {{status.finished}}<p>
+
+      <h2>Tag List</h2>
+      <ul>
+      {% for set in tag_set: %}
+        <li>{{set.name}} - {{set.tags}}</li>
+      {% endfor %}
+      </ul>
+
+    </body>
+</html>

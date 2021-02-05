@@ -1,0 +1,68 @@
+<html>
+    <head>
+      <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+      <link rel="manifest" href="/site.webmanifest">
+
+      <link rel="stylesheet" href='/static/css/post.css'/>
+
+        <title>Gazer</title>
+    </head>
+    <body>
+      <h1>Gazer v0.0</h1>
+
+      <form action="/posts">
+        <input type="text" name="tags" value="{{tags}}">
+        <input type="radio" name="service" value="archive" {{"checked" if service == "archive"}}>Archive
+        <input type="radio" name="service" value="gelbooru" {{"checked" if service == "gelbooru"}}>Gelbooru
+        <input type="radio" name="service" value="yandere" {{"checked" if service == "yandere"}}>Yandere
+        <input type="radio" name="service" value="konachan" {{"checked" if service == "konachan"}}>Konachan
+        <input type="radio" name="service" value="lolibooru" {{"checked" if service == "lolibooru"}}>Lolibooru
+        <input type="radio" name="service" value="safebooru" {{"checked" if service == "safebooru"}}>Safebooru
+        <input type="submit" value="search">
+      </form>
+
+      {% if not archived %}
+      <form action="">
+        <input type="hidden" name="service" value="{{service}}">
+        <input type="hidden" name="archive" value="true">
+        <input type="submit" value="Archive">
+      </form>
+      {% endif %}
+
+      <details>
+        <summary>tags</summary>
+        <h4>Artist</h4>
+        {% for tag in post_tags.artist %}
+          <a href="/posts?tags={{tag.tag}}&service={{service}}">{{tag.tag}}</a>
+        {% endfor %}
+        <h4>Character</h4>
+        {% for tag in post_tags.character %}
+          <a href="/posts?tags={{tag.tag}}&service={{service}}">{{tag.tag}}</a>
+        {% endfor %}
+        <h4>Copyright</h4>
+        {% for tag in post_tags.copyright %}
+          <a href="/posts?tags={{tag.tag}}&service={{service}}">{{tag.tag}}</a>
+        {% endfor %}
+        <h4>Tags</h4>
+        {% for tag in post_tags.tag %}
+          <a href="/posts?tags={{tag.tag}}&service={{service}}">{{tag.tag}}</a>
+        {% endfor %}
+
+      </details>
+
+      {% if post.video %}
+      <video controls width=90%>
+        <source src="../{{post.file}}" type="video/webm">
+      </video>
+      {% else %}
+      <img src="../{{post.file}}" width=90%>
+      {% endif %}
+
+      {% if archived %}
+      views: {{stats.views}}
+      {% endif %}
+
+    </body>
+</html>

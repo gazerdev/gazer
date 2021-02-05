@@ -1,0 +1,44 @@
+<html>
+    <head>
+      <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+      <link rel="manifest" href="/site.webmanifest">
+
+      <link rel="stylesheet" href='/static/css/posts.css'/>
+
+        <title>Gazer</title>
+    </head>
+    <body>
+      <h1>Gazer v0.0</h1>
+
+      <form action="/posts">
+        <input type="text" name="tags" value="{{tags}}">
+        <input type="radio" name="service" value="archive" {{"checked" if service == "archive"}}>Archive
+        <input type="radio" name="service" value="gelbooru" {{"checked" if service == "gelbooru"}}>Gelbooru
+        <input type="radio" name="service" value="yandere" {{"checked" if service == "yandere"}}>Yandere
+        <input type="radio" name="service" value="konachan" {{"checked" if service == "konachan"}}>Konachan
+        <input type="radio" name="service" value="lolibooru" {{"checked" if service == "lolibooru"}}>Lolibooru
+        <input type="radio" name="service" value="safebooru" {{"checked" if service == "safebooru"}}>Safebooru
+        <input type="submit" value="search">
+      </form>
+
+      <div class="post-grid">
+      {% for post in posts: %}
+        {% if post.thumbnail is defined %}
+          <a href="post/{{post.id}}?service={{service}}">
+            <img src="{{post.thumbnail}}", class="post" width=200>
+          </a>
+        {% else %}
+          <a href="post/{{post.id}}?service={{service}}&tags={{tags}}">
+            <img src="{{post.file}}", class="post" width=200>
+          </a>
+        {% endif %}
+      {% endfor %}
+      </div>
+
+      <a href="?page={{page - 1}}&tags={{tags}}&service={{service}}">Previous</a>
+      <a href="?page={{page + 1}}&tags={{tags}}&service={{service}}">Next</a>
+
+    </body>
+</html>

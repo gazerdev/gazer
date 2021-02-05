@@ -1,0 +1,6 @@
+venv/
+*.pyc
+__pycache__/
+postdata.db
+static/dump/
+static/temp/
