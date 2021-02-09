@@ -36,11 +36,26 @@ was just a personally curated booru with an easy way to browse and archive new i
 Code is still very experimental so I don't have a nice packaging solution ready,
 needs to be run from commandline and accessed via browser.
 
+### Linux/Unix/Mac
+Install any version of python3 then navigate to the gazer root directory and
+run the following commands in your terminal client.
 ```
-python3 -m venv venv
+python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python main.py
 ```
+Open a browser and go to
+localhost:5000 or 127.0.0.1:5000
 
-goto: localhost:5000
+### Windows
+Install any version of python3 then navigate to the gazer root directory and
+run the following commands in your terminal client.
+```
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
+Open a browser and go to
+localhost:5000 or 127.0.0.1:5000
