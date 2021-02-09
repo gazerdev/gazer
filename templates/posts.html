@@ -6,6 +6,7 @@
       <link rel="manifest" href="/site.webmanifest">
 
       <link rel="stylesheet" href='/static/css/posts.css'/>
+      <script type="text/javascript" src="/static/js/posts_utility.js"></script>
 
         <title>Gazer</title>
     </head>
@@ -14,12 +15,47 @@
 
       <form action="/posts">
         <input type="text" name="tags" value="{{tags}}">
-        <input type="radio" name="service" value="archive" {{"checked" if service == "archive"}}>Archive
-        <input type="radio" name="service" value="gelbooru" {{"checked" if service == "gelbooru"}}>Gelbooru
-        <input type="radio" name="service" value="yandere" {{"checked" if service == "yandere"}}>Yandere
-        <input type="radio" name="service" value="konachan" {{"checked" if service == "konachan"}}>Konachan
-        <input type="radio" name="service" value="lolibooru" {{"checked" if service == "lolibooru"}}>Lolibooru
-        <input type="radio" name="service" value="safebooru" {{"checked" if service == "safebooru"}}>Safebooru
+
+        <label for="limit">Service:</label>
+        <select name="service" id="service-select">
+          <option value="archive" {{"selected" if service == "archive"}}>Archive</option>
+          <option value="gelbooru" {{"selected" if service == "gelbooru"}}>Gelbooru</option>
+          <option value="yandere" {{"selected" if service == "yandere"}}>Yandere</option>
+          <option value="konachan" {{"selected" if service == "konachan"}}>Konachan</option>
+          <option value="lolibooru" {{"selected" if service == "lolibooru"}}>Lolibooru</option>
+          <option value="safebooru" {{"selected" if service == "safebooru"}}>Safebooru</option>
+        </select>
+
+        {% if service == "archive" %}
+        <label for="limit">Sort:</label>
+        <select name="sort" id="sort-select">
+          <option value="created-desc" {{"selected" if sort == "created-desc"}}>Created - desc</option>
+          <option value="created-asc" {{"selected" if sort == "created-asc"}}>Created - asc</option>
+          <option value="score-desc" {{"selected" if sort == "score-desc"}}>Score - desc</option>
+          <option value="score-asc" {{"selected" if sort == "score-asc"}}>Score - asc</option>
+          <option value="views-desc" {{"selected" if sort == "views-desc"}}>Views - desc</option>
+          <option value="views-asc" {{"selected" if sort == "views-asc"}}>Views - asc</option>
+        </select>
+        {% endif %}
+
+        <label for="limit">Limit:</label>
+        <select name="limit" id="limit">
+          <option value=10 {% if limit == 10 %}selected{% endif %}>10</option>
+          <option value=25 {% if limit == 25 %}selected{% endif %}>25</option>
+          <option value=50 {% if limit == 50 %}selected{% endif %}>50</option>
+          <option value=100 {% if limit == 100 %}selected{% endif %}>100</option>
+          <option value=200 {% if limit == 200 %}selected{% endif %}>200</option>
+        </select>
+
+        <label for="thumb_size">Thumb Size:</label>
+        <select name="thumb_size" id="thumb-size-select" onchange="resizeThumbs()">
+          <option value=100 {% if thumb_size == 100 %}selected{% endif %}>100</option>
+          <option value=200 {% if thumb_size == 200 %}selected{% endif %}>200</option>
+          <option value=300 {% if thumb_size == 300 %}selected{% endif %}>300</option>
+          <option value=400 {% if thumb_size == 400 %}selected{% endif %}>400</option>
+          <option value=500 {% if thumb_size == 500 %}selected{% endif %}>500</option>
+        </select>
+
         <input type="submit" value="search">
       </form>
 
@@ -27,18 +63,18 @@
       {% for post in posts: %}
         {% if post.thumbnail is defined %}
           <a href="post/{{post.id}}?service={{service}}">
-            <img src="{{post.thumbnail}}", class="post" width=200>
+            <img src="{{post.thumbnail}}", class="post" width={{thumb_size}}>
           </a>
         {% else %}
           <a href="post/{{post.id}}?service={{service}}&tags={{tags}}">
-            <img src="{{post.file}}", class="post" width=200>
+            <img src="{{post.file}}", class="post" width={{thumb_size}}>
           </a>
         {% endif %}
       {% endfor %}
       </div>
 
-      <a href="?page={{page - 1}}&tags={{tags}}&service={{service}}">Previous</a>
-      <a href="?page={{page + 1}}&tags={{tags}}&service={{service}}">Next</a>
+      <a href="?page={{page - 1}}&tags={{tags}}&service={{service}}&limit={{limit}}&sort={{sort}}">Previous</a>
+      <a href="?page={{page + 1}}&tags={{tags}}&service={{service}}&limit={{limit}}&sort={{sort}}">Next</a>
 
     </body>
 </html>

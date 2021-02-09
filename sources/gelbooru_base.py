@@ -32,6 +32,8 @@ class gelbooru_base:
         local_path = ''
         archive_path = ''
 
+        # we should change this to preserve the original source as well as
+        # labelling where it came from
         new_post = Posts(
             filename=post.get('image'),
             id=post.get('id'),

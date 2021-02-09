@@ -25,7 +25,7 @@ app = Flask(__name__)
 from models import Posts, PostStat, Tag, Base, TagStat
 from models import session
 
-def tagSearch(tags, limit=None, page=None, service=None):
+def tagSearch(tags, limit=None, page=None, service=None, sort=None):
     '''
     Search for a list of tags in database using string LIKE method
     relies on pipe delimited tag list and string search. Not as optimized
@@ -35,7 +35,23 @@ def tagSearch(tags, limit=None, page=None, service=None):
 
     if service == 'archive':
         if not tags:
-            results = session.query(Posts).order_by(desc('id')).limit(limit).offset(limit*page).all()
+            if sort == "created-desc":
+                results = session.query(Posts).order_by(desc('created_at')).limit(limit).offset(limit*page).all()
+            elif sort == "created-asc":
+                results = session.query(Posts).order_by('created_at').limit(limit).offset(limit*page).all()
+            elif sort == "score-desc":
+                results = session.query(Posts).order_by(desc('score')).limit(limit).offset(limit*page).all()
+            elif sort == "rating-asc":
+                results = session.query(Posts).order_by('score').limit(limit).offset(limit*page).all()
+            elif sort == "views-desc":
+                results = session.query(Posts, PostStat).filter(PostStat.post_filename == Posts.filename).order_by(desc('views')).limit(limit).offset(limit*page).all()
+                results = [post for post, poststat in results]
+            elif sort == "views-asc":
+                results = session.query(Posts, PostStat).filter(PostStat.post_filename == Posts.filename).order_by('views').limit(limit).offset(limit*page).all()
+                results = [post for post, poststat in results]
+            else:
+                results = session.query(Posts).order_by(desc('id')).limit(limit).offset(limit*page).all()
+            print(results)
             return [post.as_dict() for post in results]
         else:
             tag_query = ''
@@ -124,12 +140,14 @@ def scraper():
 @app.route('/posts')
 def posts():
     page = int(request.args.get('page', 0))
-    limit = int(request.args.get('limit', 20))
+    limit = int(request.args.get('limit', 25))
+    thumb_size = int(request.args.get('thumb_size', 200))
     service = request.args.get('service', 'archive')
+    sort = request.args.get('sort', 'created-desc')
     tags = request.args.get('tags', '')
 
     search_tags = tags.split()
-    posts = tagSearch(search_tags, page=page, limit=limit, service=service)
+    posts = tagSearch(search_tags, page=page, limit=limit, service=service, sort=sort)
 
     # easy way to handle our state is just to pass back the
     # values that the page was called with for use in our relative links
@@ -138,7 +156,10 @@ def posts():
                             service=service,
                             tags=tags,
                             posts=posts,
-                            page=page
+                            page=page,
+                            limit=limit,
+                            sort=sort,
+                            thumb_size=thumb_size,
                             )
 
 # this needs some sort of cleanup getting messy
@@ -176,6 +197,7 @@ def post(id):
         post = yandere_api.get_post(id)
         post_tags = yandere_api.get_tags(post.get('tags'))
         serialized_tags = yandere_api.serialize_tags(post_tags)
+
         if request.args.get('archive'):
             post_id = yandere_api.archive(post)
             yandere_api.save_tags(post_tags)
@@ -184,6 +206,7 @@ def post(id):
         post = konachan_api.get_post(id)
         post_tags = yandere_api.get_tags(post.get('tags'))
         serialized_tags = konachan_api.serialize_tags(post_tags)
+
         if request.args.get('archive'):
             post_id = konachan_api.archive(post)
             konachan_api.save_tags(post_tags)
@@ -201,6 +224,7 @@ def post(id):
         post = safebooru_api.get_post(id)
         post_tags = gelbooru_api.get_tags(post.get('tags'))  # safebooru tag api is wonky use gelbooru
         serialized_tags = safebooru_api.serialize_tags(post_tags)
+
         if request.args.get('archive'):
             post_id = safebooru_api.archive(post)
             safebooru_api.save_tags(post_tags)
