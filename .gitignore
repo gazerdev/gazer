@@ -1,4 +1,8 @@
 venv/
+dist/
+gazer.egg-info/
+DeepDanbooru/
+build/
 *.pyc
 __pycache__/
 postdata.db
