@@ -27,6 +27,9 @@
         </select>
 
         {% if service == "archive" %}
+        <input type="checkbox" id="dd_enabled" name="dd_enabled" value="enabled" {{"checked" if dd_enabled}}>
+        <label for="dd_enabled">DD</label>
+
         <label for="limit">Sort:</label>
         <select name="sort" id="sort-select">
           <option value="created-desc" {{"selected" if sort == "created-desc"}}>Created - desc</option>

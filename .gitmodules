@@ -1,0 +1,3 @@
+[submodule "DeepDanbooru"]
+	path = DeepDanbooru
+	url = https://github.com/KichangKim/DeepDanbooru.git

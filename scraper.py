@@ -5,7 +5,7 @@ from sources.lolibooru import lolibooru_api
 from sources.yandere import yandere_api
 from sources.safebooru import safebooru_api
 
-from models import Posts, PostStat, Tag, Base
+from models import Posts, Tag, Base
 from models import session
 
 status_data = {"active":True, "current_tags":None, "images_downloaded": 0, "finished":False}
@@ -16,15 +16,14 @@ source_map = {gelbooru_api.source:gelbooru_api,
             safebooru_api.source:safebooru_api
             }
 
-with open("scraper_data/tag_set.json") as tags:
-    tag_sets = json.load(tags)
-with open("scraper_data/config.json") as config:
-    CONFIG = json.load(config)
-with open("scraper_data/status.json", "w") as status:
-    json.dump(status_data, status)
-
 def scraper_run():
     '''Runs our scraper until we get through all listed tags'''
+    with open("scraper_data/tag_set.json") as tags:
+        tag_sets = json.load(tags)
+    with open("scraper_data/config.json") as config:
+        CONFIG = json.load(config)
+    with open("scraper_data/status.json", "w") as status:
+        json.dump(status_data, status)
 
     for tag_set in tag_sets:
         page = 0

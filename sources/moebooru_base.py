@@ -3,8 +3,9 @@ import os
 import shutil
 import concurrent.futures
 
-from models import Posts, Base, Tag, PostStat
+from models import Posts, Base, Tag
 from models import session
+import ddInterface
 
 from sources.gelbooru import gelbooru_api
 
@@ -37,29 +38,30 @@ class moebooru_base:
         local_path = ''
         archive_path = ''
 
+        filename = '{}.{}'.format(post.get('md5'), post.get('file_ext'))
+        local_path = 'static/temp/{}'.format(filename)
+        archive_path = 'static/dump/{}/{}/{}'.format(post.get('md5')[:2], post.get('md5')[2:4], filename)
+
+        dd_tags = ddInterface.evaluate(local_path)
+        dd_tags = ddInterface.union(tags=post.get('tags'), dd_tags=dd_tags)
+
+        print('debug moebooru')
+        print(post)
         new_post = Posts(
             filename='{}.{}'.format(post.get('md5'),post.get('file_ext')),
             id=post.get('id'),
-            source=cls.source,
+            booru=cls.source,
+            source=post.get('source'),
             score=post.get('score'),
             tags=tags,
+            dd_tags=dd_tags,
             rating=post.get('rating'),
             status=post.get('status'),
             created_at=post.get('created_at'),
             creator_id=post.get('creator_id')
             )
         session.add(new_post)
-        session.flush()
-        new_post_stat = PostStat(
-            post_filename=new_post.filename,
-            post_id=new_post.id
-            )
-        session.add(new_post_stat)
         session.commit()
-
-        filename = '{}.{}'.format(post.get('md5'), post.get('file_ext'))
-        local_path = 'static/temp/{}'.format(filename)
-        archive_path = 'static/dump/{}/{}/{}'.format(post.get('md5')[:2], post.get('md5')[2:4], filename)
 
         os.makedirs(os.path.dirname(archive_path), exist_ok=True)
         shutil.copyfile(local_path, archive_path)

@@ -3,8 +3,9 @@ import os
 import shutil
 import concurrent.futures
 
-from models import Posts, Tag, Base, PostStat, TagStat
+from models import Posts, Tag, Base
 from models import session
+import ddInterface
 
 class gelbooru_base:
     '''
@@ -32,26 +33,23 @@ class gelbooru_base:
         local_path = ''
         archive_path = ''
 
-        # we should change this to preserve the original source as well as
-        # labelling where it came from
+        dd_tags = ddInterface.evaluate('static/temp/{}'.format(post.get('image')))
+        dd_tags = ddInterface.union(tags=post.get('tags'), dd_tags=dd_tags)
+
         new_post = Posts(
             filename=post.get('image'),
             id=post.get('id'),
-            source=cls.source,
+            booru=cls.source,
+            source=post.get('source'),
             score=post.get('score'),
             tags=tags,
+            dd_tags=dd_tags,
             rating=post.get('rating'),
             status=post.get('status'),
             created_at=post.get('created_at'),
             creator_id=post.get('creator_id')
             )
         session.merge(new_post)
-        session.flush()
-        new_post_stat = PostStat(
-            post_filename=new_post.filename,
-            post_id=new_post.id
-        )
-        session.merge(new_post_stat)
         session.commit()
 
         local_path = 'static/temp/{}'.format(post.get('image'))
@@ -135,9 +133,7 @@ class gelbooru_base:
         for tag in tags:
             new_tag = Tag(tag=tag.get('tag'), count=tag.get('count'),
                           type=tag.get('type'), ambiguous=tag.get('ambiguous'))
-            new_tag_stat = TagStat(tag=tag.get('tag'))
             session.merge(new_tag)
-            session.merge(new_tag_stat)
 
         session.commit()
 

@@ -6,7 +6,6 @@
       <link rel="manifest" href="/site.webmanifest">
 
       <link rel="stylesheet" href='/static/css/post.css'/>
-      <script type="text/javascript" src="/static/js/posts_utility.js"></script>
 
         <title>Gazer</title>
     </head>
@@ -68,7 +67,7 @@
       {% endif %}
 
       <details>
-        <summary>tags</summary>
+        <summary>Tags</summary>
         <h4>Artist</h4>
         {% for tag in post_tags.artist %}
           <a href="/posts?tags={{tag.tag}}&service={{service}}">{{tag.tag}}</a>
@@ -85,7 +84,14 @@
         {% for tag in post_tags.tag %}
           <a href="/posts?tags={{tag.tag}}&service={{service}}">{{tag.tag}}</a>
         {% endfor %}
-
+        {% if service == "archive" %}
+        <details>
+          <summary>DD Tags</summary>
+          {% for tag in dd_tags.tag %}
+            <a href="/posts?tags={{tag.tag}}&service={{service}}">{{tag.tag}}</a>
+          {% endfor %}
+        </details>
+        {% endif %}
       </details>
 
       {% if post.video %}
@@ -100,9 +106,10 @@
         <summary>details</summary>
         id: {{post.id}}<p>
         {% if archived %}
-        views: {{stats.views}}<p>
-        booru: {{post.source}}<p>
+        views: {{post.views}}<p>
+        booru: {{post.booru}}<p>
         {% endif %}
+        source: {{post.source}}<p>
         rating: {{post.rating}}<p>
         score: {{post.score}}<p>
         created: {{post.created_at}}

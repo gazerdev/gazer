@@ -2,3 +2,4 @@ venv/
 *.pyc
 __pycache__/
 postdata.db
+dd_pretrained/

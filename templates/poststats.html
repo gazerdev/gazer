@@ -11,8 +11,8 @@
     <body>
       <h1>Local Posts</h1>
       <ul>
-        {% for stat in stats: %}
-          <li><a href="/post/{{stat.post_id}}">{{stat.post_filename}}</a> - views: {{stat.views}}</li>
+        {% for post in posts: %}
+          <li><a href="/post/{{post.id}}">{{post.filename}}</a> - views: {{post.views}}</li>
         {% endfor %}
       </ul>
 
