@@ -17,15 +17,15 @@ from sources.lolibooru import lolibooru_api
 from sources.safebooru import safebooru_api
 
 # clean out temp directory when we start
-shutil.rmtree('static/temp')
-os.mkdir('static/temp')
+shutil.rmtree('gazer/static/temp')
+os.mkdir('gazer/static/temp')
 
 app = Flask(__name__)
 
-from models import Posts, PostStat, Tag, Base, TagStat
+from models import Posts, Tag, Base
 from models import session
 
-def tagSearch(tags, limit=None, page=None, service=None, sort=None):
+def tagSearch(tags, limit=None, page=None, service=None, sort=None, dd_enabled=False):
     '''
     Search for a list of tags in database using string LIKE method
     relies on pipe delimited tag list and string search. Not as optimized
@@ -41,31 +41,45 @@ def tagSearch(tags, limit=None, page=None, service=None, sort=None):
                 results = session.query(Posts).order_by('created_at').limit(limit).offset(limit*page).all()
             elif sort == "score-desc":
                 results = session.query(Posts).order_by(desc('score')).limit(limit).offset(limit*page).all()
-            elif sort == "rating-asc":
+            elif sort == "score-asc":
                 results = session.query(Posts).order_by('score').limit(limit).offset(limit*page).all()
             elif sort == "views-desc":
-                results = session.query(Posts, PostStat).filter(PostStat.post_filename == Posts.filename).order_by(desc('views')).limit(limit).offset(limit*page).all()
-                results = [post for post, poststat in results]
+                results = session.query(Posts).order_by(desc('views')).limit(limit).offset(limit*page).all()
             elif sort == "views-asc":
-                results = session.query(Posts, PostStat).filter(PostStat.post_filename == Posts.filename).order_by('views').limit(limit).offset(limit*page).all()
-                results = [post for post, poststat in results]
+                results = session.query(Posts).order_by('views').limit(limit).offset(limit*page).all()
             else:
                 results = session.query(Posts).order_by(desc('id')).limit(limit).offset(limit*page).all()
-            print(results)
             return [post.as_dict() for post in results]
         else:
             tag_query = ''
+            tag_field = 'dd_tags' if dd_enabled else 'tags'
+            order_clause = ''
+
+            # giant if clause for ordering fix later
+            if sort == "created-desc":
+                order_clause = "ORDER BY date(created_at) desc"
+            elif sort == "created-asc":
+                order_clause = "ORDER BY date(created_at)"
+            elif sort == "score-desc":
+                order_clause = "ORDER BY score desc"
+            elif sort == "score-asc":
+                order_clause = "ORDER BY score asc"
+            elif sort == "views-desc":
+                order_clause = "ORDER BY views desc"
+            elif sort == "views-asc":
+                order_clause = "ORDER BY views"
+
             for i, tag in enumerate(tags):
                 if i == 0:
-                    tag_query += '''tags LIKE '%|{}|%' '''.format(tag)
+                    tag_query += '''{} LIKE '%|{}|%' '''.format(tag_field, tag)
                 else:
-                    tag_query += '''AND tags LIKE '%|{}|%' '''.format(tag)
+                    tag_query += '''AND {} LIKE '%|{}|%' '''.format(tag_field, tag)
 
             query = '''SELECT * FROM posts
                         WHERE {}
-                        ORDER BY date(created_at)
+                        {}
                         LIMIT {} OFFSET {}
-                        '''.format(tag_query, limit, limit*page)
+                        '''.format(tag_query, order_clause, limit, limit*page)
             results = session.execute(query)
             results = [Posts.from_tuple(r) for r in results]
 
@@ -110,8 +124,8 @@ def index():
 
 @app.route('/tags')
 def tags():
-    tags = session.query(TagStat).order_by(desc(TagStat.views)).all()
-    tags = [stat.as_dict() for stat in tags]
+    tags = session.query(Tag).order_by(desc(Tag.views)).limit(100).all()
+    tags = [tag.as_dict() for tag in tags]
     return render_template("tags.html", tags=tags)
 
 @app.route('/tag/<name>')
@@ -124,18 +138,24 @@ def tag(name):
 
 @app.route('/poststats')
 def poststats():
-    stats = session.query(PostStat).order_by(desc(PostStat.views)).all()
-    stats = [stat.as_dict() for stat in stats]
-    return render_template("poststats.html", stats=stats)
+    posts = session.query(Posts).order_by(desc(Posts.views)).limit(100).all()
+    posts = [stat.as_dict() for stat in posts]
+    return render_template("poststats.html", posts=posts)
 
-@app.route('/scraper')
+@app.route('/scraper', methods = ["GET", "POST"])
 def scraper():
-    with open("scraper_data/tag_set.json") as tags:
+    if request.method == "POST":
+        scraper_process = Process(target=scraper_run)
+        scraper_process.start()
+
+    with open("gazer/scraper_data/tag_set.json") as tags:
         tag_set = json.load(tags)
-    with open("scraper_data/status.json") as status:
+    with open("gazer/scraper_data/status.json") as status:
         current_status = json.load(status)
 
     return render_template("scraper.html", tag_set=tag_set, status=current_status)
+
+# add some endpoint here to handle our restart button
 
 @app.route('/posts')
 def posts():
@@ -144,10 +164,11 @@ def posts():
     thumb_size = int(request.args.get('thumb_size', 200))
     service = request.args.get('service', 'archive')
     sort = request.args.get('sort', 'created-desc')
+    dd_enabled = True if request.args.get('dd_enabled') else False
     tags = request.args.get('tags', '')
 
     search_tags = tags.split()
-    posts = tagSearch(search_tags, page=page, limit=limit, service=service, sort=sort)
+    posts = tagSearch(search_tags, page=page, limit=limit, service=service, sort=sort, dd_enabled=dd_enabled)
 
     # easy way to handle our state is just to pass back the
     # values that the page was called with for use in our relative links
@@ -159,6 +180,7 @@ def posts():
                             page=page,
                             limit=limit,
                             sort=sort,
+                            dd_enabled=dd_enabled,
                             thumb_size=thumb_size,
                             )
 
@@ -169,6 +191,7 @@ def post(id):
     tags = request.args.get('tags', '')
     archived = False
     post_tags = []
+    serialized_dd_extra_tags = None
 
     search_tags = tags.split()
 
@@ -176,13 +199,14 @@ def post(id):
     if service == 'archive':
         archived = True
         post = session.query(Posts).filter(Posts.id==id).first()
+        post.views += 1
+        session.commit()
         post = post.as_dict()
         serialized_tags = Tag.serialize_tags(post.get('tags'), increment_views=True)
 
-        stats = session.query(PostStat).filter(PostStat.post_filename==post['filename']).first()
-        stats.views += 1
-        session.commit()
-        stats = stats.as_dict()
+        if post.get('dd_tags'):
+            dd_extra_tags = list(set(post.get('dd_tags')) - set(post.get('tags')))
+            serialized_dd_extra_tags = Tag.serialize_tags(dd_extra_tags)
 
     elif service == 'gelbooru':
         post = gelbooru_api.get_post(id)
@@ -240,6 +264,7 @@ def post(id):
                             tags=tags,
                             stats=stats,
                             post_tags=serialized_tags,
+                            dd_tags=serialized_dd_extra_tags,
                             service=service,
                             archived=archived
                             )
@@ -249,6 +274,8 @@ def startup():
     import os
     if not os.path.isfile('postdata.db'):
         import create_data
+    if not os.path.isdir('dd_pretrained'):
+        print('dd not enabled')
 
 if __name__ == "__main__":
     # handle any startup tasks

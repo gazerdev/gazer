@@ -43,11 +43,12 @@ class safebooru_api(gelbooru_base):
         post = response.json()[0]
 
         post['file'] = 'static/temp/{}'.format(post.get('image'))
+        filepath = 'gazer/{}'.format(post['file'])
 
         if not os.path.exists(post['file']):
             image_url = '{}/images/{}/{}'.format(cls.base_url, post.get('directory'), post.get('image'))
             response = requests.get(image_url, stream=True)
-            with open(post['file'], 'wb') as out_file:
+            with open(filepath, 'wb') as out_file:
                 shutil.copyfileobj(response.raw, out_file)
             del response
 
@@ -69,13 +70,13 @@ class safebooru_api(gelbooru_base):
             for post in posts:
                 image_name = post.get('image')[:-4]
                 # we may need to change this file structure if folder gets saturated
-                local_path_thumb = 'static/temp/thumb_{}.jpg'.format(post.get('hash'))
+                local_path_thumb = 'gazer/static/temp/thumb_{}.jpg'.format(post.get('hash'))
                 url = "{}/{}/thumbnail_{}.jpg"\
                         .format(cls.thumb_url, post.get('directory'), image_name)
                 futures.append(executor.submit(cls.download_thumbnail, url=url, local_path_thumb=local_path_thumb))
 
                 # may need some error handling here
-                post['thumbnail'] = local_path_thumb
+                post['thumbnail'] = 'static/temp/thumb_{}.jpg'.format(post.get('hash'))
 
             # just some debug stuff for now
             for future in concurrent.futures.as_completed(futures):

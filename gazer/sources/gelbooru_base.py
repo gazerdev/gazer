@@ -3,12 +3,11 @@ import os
 import shutil
 import concurrent.futures
 
-from models import Posts, Base, Tag, PostStat
+from models import Posts, Tag, Base
 from models import session
+import ddInterface
 
-from sources.gelbooru import gelbooru_api
-
-class moebooru_base:
+class gelbooru_base:
     '''
     Lets consolidate our interaction with the booru api into a nice
     class so we don't have to stare at a bunch of messy code.
@@ -17,9 +16,6 @@ class moebooru_base:
     base_url = None
     thumb_url = None
     json_api = None
-    post_dict = {}
-
-    tag_types = {1:'artist', 3:'copyright', 4:'character'}
 
     def __init__():
         pass
@@ -27,7 +23,7 @@ class moebooru_base:
     @classmethod
     def archive(cls, post):
         '''
-        Lazy moebooru archive function adds a post to our
+        Lazy gelbooru archive function adds a post to our
         db and moves the image to our dump area.
         '''
         if isinstance(post.get('tags'), list):
@@ -37,29 +33,27 @@ class moebooru_base:
         local_path = ''
         archive_path = ''
 
+        dd_tags = ddInterface.evaluate('gazer/static/temp/{}'.format(post.get('image')))
+        dd_tags = ddInterface.union(tags=post.get('tags'), dd_tags=dd_tags)
+
         new_post = Posts(
-            filename='{}.{}'.format(post.get('md5'),post.get('file_ext')),
+            filename=post.get('image'),
             id=post.get('id'),
-            source=cls.source,
+            booru=cls.source,
+            source=post.get('source'),
             score=post.get('score'),
             tags=tags,
+            dd_tags=dd_tags,
             rating=post.get('rating'),
             status=post.get('status'),
             created_at=post.get('created_at'),
             creator_id=post.get('creator_id')
             )
-        session.add(new_post)
-        session.flush()
-        new_post_stat = PostStat(
-            post_filename=new_post.filename,
-            post_id=new_post.id
-            )
-        session.add(new_post_stat)
+        session.merge(new_post)
         session.commit()
 
-        filename = '{}.{}'.format(post.get('md5'), post.get('file_ext'))
-        local_path = 'static/temp/{}'.format(filename)
-        archive_path = 'static/dump/{}/{}/{}'.format(post.get('md5')[:2], post.get('md5')[2:4], filename)
+        local_path = 'gazer/static/temp/{}'.format(post.get('image'))
+        archive_path = 'gazer/static/dump/{}/{}/{}'.format(post.get('image')[:2], post.get('image')[2:4], post.get('image'))
 
         os.makedirs(os.path.dirname(archive_path), exist_ok=True)
         shutil.copyfile(local_path, archive_path)
@@ -67,20 +61,17 @@ class moebooru_base:
         return new_post.id
 
     @classmethod
-    def cached_post(cls, id=None):
-        if id:
-            return cls.post_dict.get(int(id))
-        return None
-
-    @classmethod
     def get_post(cls, id):
-        post = cls.cached_post(id)
+        url = "{}/index.php?page=dapi&s=post&q=index&json=1&id={}".format(cls.base_url, id)
+        response = requests.get(url)
+        post = response.json()[0]
 
-        post['file'] = 'static/temp/{}.{}'.format(post.get('md5'), post.get('file_ext'))
+        post['file'] = 'static/temp/{}'.format(post.get('image'))
+        filepath = 'gazer/{}'.format(post['file'])
 
-        if not os.path.exists(post['file']):
-            response = requests.get(post.get('jpeg_url'), stream=True)
-            with open(post['file'], 'wb') as out_file:
+        if not os.path.exists(filepath):
+            response = requests.get(post.get('file_url'), stream=True)
+            with open(filepath, 'wb') as out_file:
                 shutil.copyfileobj(response.raw, out_file)
             del response
 
@@ -93,47 +84,59 @@ class moebooru_base:
     @classmethod
     def get_posts(cls, tags=None, limit=100, page=0):
         '''
-        Grab post json from the moebooru api
-        Moebooru api page starts from 1
+        Grab post json from the gelbooru api
         '''
         tags = ' '.join(tags)
-        url = "{}/{}?tags={}&limit={}&page={}"\
-                .format(cls.base_url, cls.json_api, tags, limit, page+1)
+        url = "{}/{}&tags={}&limit={}&pid={}"\
+                .format(cls.base_url, cls.json_api, tags, limit, page)
         response = requests.get(url)
 
         # gelbooru api does not return empty json list properly
         if response.text:
-            # give each post an image property for compatiblity with scraper
-            posts = response.json()
-            for post in posts:
-                post['image'] = '{}.{}'.format(post.get('md5'), post.get('file_ext'))
-
-            # hack lookup table to get around moebooru api issues
-            cls.post_dict = {post['id']:post for post in posts}
-
-            return posts
-        else:
-            return []
+            return response.json()
+        return []
 
     @classmethod
     def get_tags(cls, tags=None):
         '''
         Grab tag data from the API
-        Moebooru tag api has issues so just ask gelbooru instead
         '''
-        return gelbooru_api.get_tags(tags)
+        tags = ' '.join(tags)
+        url = "{}/index.php?page=dapi&s=tag&q=index&json=1&names={}".format(cls.base_url, tags)
+        response = requests.get(url)
+
+        if response.text:
+            return response.json()
+        return []
 
     @classmethod
     def serialize_tags(cls, tags=None):
-        return gelbooru_api.serialize_tags(tags)
+        serialized_tags = {'artist':[], 'character':[], 'copyright':[], 'tag':[]}
+        #tags = cls.get_tags(tags)
+
+        for tag in tags:
+            if tag.get('type') == 'artist':
+                serialized_tags['artist'].append(tag)
+            elif tag.get('type') == 'character':
+                serialized_tags['character'].append(tag)
+            elif tag.get('type') == 'copyright':
+                serialized_tags['copyright'].append(tag)
+            else:
+                serialized_tags['tag'].append(tag)
+
+        return serialized_tags
 
     @classmethod
     def save_tags(cls, tags=None):
         '''
         Save tag data to the database
         '''
+        for tag in tags:
+            new_tag = Tag(tag=tag.get('tag'), count=tag.get('count'),
+                          type=tag.get('type'), ambiguous=tag.get('ambiguous'))
+            session.merge(new_tag)
 
-        gelbooru_api.save_tags(tags)
+        session.commit()
 
     @classmethod
     def download_thumbnail(cls, url=None, local_path_thumb=None):
@@ -162,13 +165,13 @@ class moebooru_base:
             futures = []
             for post in posts:
                 # we may need to change this file structure if folder gets saturated
-                local_path_thumb = 'static/temp/thumb_{}.jpg'.format(post.get('md5'))
-                url = "{}/{}/{}/{}.jpg"\
-                        .format(cls.thumb_url, post.get('md5')[:2], post.get('md5')[2:4], post.get('md5'))
+                local_path_thumb = 'gazer/static/temp/thumb_{}.jpg'.format(post.get('hash'))
+                url = "{}/{}/thumbnail_{}.jpg"\
+                        .format(cls.thumb_url, post.get('directory'), post.get('hash'))
                 futures.append(executor.submit(cls.download_thumbnail, url=url, local_path_thumb=local_path_thumb))
 
                 # may need some error handling here
-                post['thumbnail'] = local_path_thumb
+                post['thumbnail'] = 'static/temp/thumb_{}.jpg'.format(post.get('hash'))
 
             # just some debug stuff for now
             for future in concurrent.futures.as_completed(futures):
