@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  gazer:
+    build: .
+    ports:
+      - 5000:5000
+      #volumes:
+      #- ./config/:/gazer/gazer/scraper_data/
+      #- ./scrape-temp/:/gazer/gazer/static/temp/
