@@ -1,7 +1,7 @@
 # Old Python because of Tensorflow 
 FROM python:3.8-slim
 
-WORKDIR /usr/src/gazer
+WORKDIR /gazer
 COPY . .
 
 RUN pip install -r requirements.txt && python setup.py install
