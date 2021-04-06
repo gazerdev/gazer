@@ -284,7 +284,7 @@ if __name__ == "__main__":
     # run our scraper in another process
     scraper_process = Process(target=scraper_run)
     scraper_process.start()
-    app.run()
+    app.run("0.0.0.0")
 
     # join scraper after we finish
     scraper_process.join()

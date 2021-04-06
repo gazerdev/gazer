@@ -76,6 +76,17 @@ python gazer
 Open a browser and go to
 localhost:5000 or 127.0.0.1:5000
 
+### Docker
+If you have docker set up you can use the included dockerfile to run the service.
+Note by default this dockerfile has deepdanbooru integration enabled.
+
+```
+docker build -t gazer .
+docker run -p 5000:5000 gazer
+```
+Open a browser and go to
+localhost:5000 or 127.0.0.1:5000
+
 ## Getting Started
 
 ### Setup Auto Scraper
