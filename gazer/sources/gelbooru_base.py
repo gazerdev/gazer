@@ -2,10 +2,14 @@ import requests
 import os
 import shutil
 import concurrent.futures
+import html
+import json
 
 from models import Posts, Tag, Base
 from models import session
+from utilities import escapeString
 import ddInterface
+
 
 class gelbooru_base:
     '''
@@ -64,7 +68,7 @@ class gelbooru_base:
     def get_post(cls, id):
         url = "{}/index.php?page=dapi&s=post&q=index&json=1&id={}".format(cls.base_url, id)
         response = requests.get(url)
-        post = response.json()[0]
+        post = json.loads(html.unescape(response.text))[0]
 
         post['file'] = 'static/temp/{}'.format(post.get('image'))
         filepath = 'gazer/{}'.format(post['file'])
@@ -93,7 +97,7 @@ class gelbooru_base:
 
         # gelbooru api does not return empty json list properly
         if response.text:
-            return response.json()
+            return json.loads(html.unescape(response.text))
         return []
 
     @classmethod

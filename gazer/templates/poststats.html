@@ -1,20 +1,8 @@
-<html>
-    <head>
-        <title>Gazer v0.0</title>
-
-        <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="static/favicon-16x16.png">
-        <link rel="manifest" href="/site.webmanifest">
-
-    </head>
-    <body>
-      <h1>Local Posts</h1>
+{% extends "base.html" %}
+{% block content %}
       <ul>
         {% for post in posts: %}
           <li><a href="/post/{{post.id}}">{{post.filename}}</a> - views: {{post.views}}</li>
         {% endfor %}
       </ul>
-
-    </body>
-</html>
+{% endblock content %}

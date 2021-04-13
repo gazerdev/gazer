@@ -9,6 +9,7 @@ import shutil
 import os
 from multiprocessing import Process
 from scraper import scraper_run
+from utilities import escapeString
 
 from sources.gelbooru import gelbooru_api
 from sources.yandere import yandere_api
@@ -24,6 +25,7 @@ app = Flask(__name__)
 
 from models import Posts, Tag, Base
 from models import session
+
 
 def tagSearch(tags, limit=None, page=None, service=None, sort=None, dd_enabled=False):
     '''
@@ -70,10 +72,11 @@ def tagSearch(tags, limit=None, page=None, service=None, sort=None, dd_enabled=F
                 order_clause = "ORDER BY views"
 
             for i, tag in enumerate(tags):
+                tag_escaped = escapeString(tag)
                 if i == 0:
-                    tag_query += '''{} LIKE '%|{}|%' '''.format(tag_field, tag)
+                    tag_query += '''{} LIKE '%|{}|%' '''.format(tag_field, tag_escaped)
                 else:
-                    tag_query += '''AND {} LIKE '%|{}|%' '''.format(tag_field, tag)
+                    tag_query += '''AND {} LIKE '%|{}|%' '''.format(tag_field, tag_escaped)
 
             query = '''SELECT * FROM posts
                         WHERE {}
@@ -192,6 +195,10 @@ def post(id):
     archived = False
     post_tags = []
     serialized_dd_extra_tags = None
+    limit = int(request.args.get('limit', 25))
+    thumb_size = int(request.args.get('thumb_size', 200))
+    sort = request.args.get('sort', 'created-desc')
+    dd_enabled = True if request.args.get('dd_enabled') else False
 
     search_tags = tags.split()
 
@@ -266,6 +273,10 @@ def post(id):
                             post_tags=serialized_tags,
                             dd_tags=serialized_dd_extra_tags,
                             service=service,
+                            limit=limit,
+                            dd_enabled=dd_enabled,
+                            thumb_size=thumb_size,
+                            sort=sort,
                             archived=archived
                             )
 

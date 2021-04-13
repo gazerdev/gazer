@@ -2,9 +2,12 @@ import requests
 import os
 import shutil
 import concurrent.futures
+import html
+import json
 
 from models import Posts, Base, Tag
 from models import session
+from utilities import escapeString
 import ddInterface
 
 from sources.gelbooru import gelbooru_api
@@ -32,7 +35,8 @@ class moebooru_base:
         db and moves the image to our dump area.
         '''
         if isinstance(post.get('tags'), list):
-            post['tags'] = ' '.join(post.get('tags'))
+            etags = [escapeString(tag) for tag in post.get('tags')]
+            post['tags'] = ' '.join(etags)
 
         tags = '|{}|'.format(post.get('tags').replace(' ', '|'))
         local_path = ''
@@ -105,7 +109,7 @@ class moebooru_base:
         # gelbooru api does not return empty json list properly
         if response.text:
             # give each post an image property for compatiblity with scraper
-            posts = response.json()
+            posts = json.loads(html.unescape(response.text))
             for post in posts:
                 post['image'] = '{}.{}'.format(post.get('md5'), post.get('file_ext'))
 
@@ -133,7 +137,6 @@ class moebooru_base:
         '''
         Save tag data to the database
         '''
-
         gelbooru_api.save_tags(tags)
 
     @classmethod
