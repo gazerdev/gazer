@@ -7,7 +7,7 @@ build/
 __pycache__/
 postdata.db
 dd_pretrained/
-gazer/static/temp/
+gazer/static/temp/*
 gazer/static/dump/
 gazer/scraper_data/
 
