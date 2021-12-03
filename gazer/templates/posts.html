@@ -1,24 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
-<script src="static/js/posts_utility.js"></script>
+<script src="/static/js/posts_utility.js"></script>
 
-<div class="post-grid">
-  {% for post in posts: %}
-    {% if post.thumbnail is defined %}
-      <a href="post/{{post.id}}?service={{service}}&tags={{tags}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}">
-        <img src="{{post.thumbnail}}", class="post" width={{thumb_size}}>
-      </a>
-    {% else %}
-      <a href="post/{{post.id}}?service={{service}}&tags={{tags}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}">
-        <img src="{{post.file}}", class="post" width={{thumb_size}}>
-      </a>
-    {% endif %}
-  {% endfor %}
-</div>
 
-<div class="navigation-row">
-  <a href="?page={{page - 1}}&tags={{tags}}&service={{service}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}" class="prev-button">prev</a>
-  <a href="?page={{page + 1}}&tags={{tags}}&service={{service}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}" class="next-button">next</a>
+<div class="posts-container">
+  {% if page >= 1 %}
+  <a href="?page={{page - 1}}&tags={{tags}}&service={{service}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}" class="prev-button">
+    <div class="navigation-button">
+    </div>
+  </a>
+  {% endif %}
+
+  <div class="post-grid">
+    {% for post in posts: %}
+      {% if post.thumbnail is defined %}
+        <a href="post/{{post.id}}?service={{service}}&tags={{tags}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}">
+          <img src="{{post.thumbnail}}", class="post" width={{thumb_size}}>
+        </a>
+      {% elif post.video is true %}
+        <a href="post/{{post.id}}?service={{service}}&tags={{tags}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}" color="red">
+          <video width={{thumb_size}} style='border: 3px solid #003399;'>
+            <source src="../{{post.file}}" type="video/webm">
+          </video>
+        </a>
+      {% else %}
+        <a href="post/{{post.id}}?service={{service}}&tags={{tags}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}">
+          <img src="{{post.file}}", class="post" width={{thumb_size}}>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <a href="?page={{page + 1}}&tags={{tags}}&service={{service}}&limit={{limit}}&sort={{sort}}&thumb_size={{thumb_size}}&dd_enabled={{dd_enabled}}" class="next-button">
+    <div class="navigation-button">
+    </div>
+  </a>
+
 </div>
 
 {% endblock content %}

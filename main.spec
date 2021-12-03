@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['/home/gray/Documents/local_booru'],
+             pathex=['/home/gray/Documents/gazer'],
              binaries=[],
              datas=[('templates', 'templates'), ('static', 'static')],
              hiddenimports=[],

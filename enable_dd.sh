@@ -7,6 +7,7 @@ source venv/bin/activate
 python setup.py install
 pip install --upgrade pip
 pip install tensorflow
+pip install scikit-image
 
 # fetch pretrained model
 cd ..

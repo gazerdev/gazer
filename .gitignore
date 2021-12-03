@@ -8,3 +8,8 @@ __pycache__/
 postdata.db
 dd_pretrained/
 gazer/static/temp/
+gazer/static/dump/
+gazer/scraper_data/
+
+bg_task.sh
+start_bg.sh

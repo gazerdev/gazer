@@ -4,6 +4,8 @@ import shutil
 import concurrent.futures
 import html
 import json
+import datetime
+from dateutil import parser
 
 from models import Posts, Tag, Base
 from models import session
@@ -39,6 +41,8 @@ class gelbooru_base:
 
         dd_tags = ddInterface.evaluate('gazer/static/temp/{}'.format(post.get('image')))
         dd_tags = ddInterface.union(tags=post.get('tags'), dd_tags=dd_tags)
+        parsed_date = parser.parse(post.get('created_at'))
+        parsed_date = int(parsed_date.strftime("%Y%m%d%H%M%S"))
 
         new_post = Posts(
             filename=post.get('image'),
@@ -50,7 +54,7 @@ class gelbooru_base:
             dd_tags=dd_tags,
             rating=post.get('rating'),
             status=post.get('status'),
-            created_at=post.get('created_at'),
+            created_at=parsed_date,
             creator_id=post.get('creator_id')
             )
         session.merge(new_post)
@@ -97,7 +101,12 @@ class gelbooru_base:
 
         # gelbooru api does not return empty json list properly
         if response.text:
-            return json.loads(html.unescape(response.text))
+            try:
+                return json.loads(html.unescape(response.text))
+            except Exception as e:
+                print("Posts get JSON failure")
+                print(url)
+                print(e)
         return []
 
     @classmethod

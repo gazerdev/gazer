@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 Base = declarative_base()
 
-engine = create_engine('sqlite:///postdata.db')
+engine = create_engine('sqlite:///postdata.db', connect_args={'check_same_thread': False})
 
 
 class Posts(Base):
@@ -23,7 +23,7 @@ class Posts(Base):
     tags = Column(String)
     dd_tags = Column(String)
     rating = Column(String)
-    created_at = Column(String)
+    created_at = Column(Integer)
     status = Column(String)
     creator_id = Column(Integer)
     change = Column(Integer)

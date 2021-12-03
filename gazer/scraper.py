@@ -1,4 +1,4 @@
-import time, json
+import time, json, os
 from sources.gelbooru import gelbooru_api
 from sources.konachan import konachan_api
 from sources.lolibooru import lolibooru_api
@@ -18,6 +18,13 @@ source_map = {gelbooru_api.source:gelbooru_api,
 
 def scraper_run():
     '''Runs our scraper until we get through all listed tags'''
+    if os.path.exists("gazer/scraper_data/lock"):
+        return
+
+    # process lock
+    with open("gazer/scraper_data/lock", "w") as lock:
+        pass
+
     with open("gazer/scraper_data/tag_set.json") as tags:
         tag_sets = json.load(tags)
     with open("gazer/scraper_data/config.json") as config:
@@ -56,3 +63,8 @@ def scraper_run():
     status_data["finished"] = True
     with open("gazer/scraper_data/status.json", "w") as status:
         json.dump(status_data, status)
+
+    # end process lock
+    os.remove("gazer/scraper_data/lock")
+
+    

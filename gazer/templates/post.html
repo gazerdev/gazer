@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
+<script src="/static/js/posts_utility.js"></script>
+
 {% if not archived %}
-<form action="">
+<form action="" class="search-row">
   <input type="hidden" name="service" value="{{service}}">
   <input type="hidden" name="tags" value="{{tags}}">
   <input type="hidden" name="limit" value="{{limit}}">
@@ -13,7 +15,7 @@
 </form>
 {% endif %}
 
-<div id="main">
+<div class="post-main">
   <tags>
     <h4>Artist</h4>
     <ul>

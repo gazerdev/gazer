@@ -4,7 +4,6 @@
       <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
       <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
       <link rel="manifest" href="/site.webmanifest">
-
       <link rel="stylesheet" href='/static/css/base.css'/>
 
     <title>Gazer</title>
@@ -12,8 +11,14 @@
     <body>
       <a href="/"><h1><img src="/static/android-chrome-512x512.png" type="image/png" width=40 height=40></a> Gazer </h1>
 
-      <form action="/posts">
-        <input type="text" name="tags" value="{{tags}}">
+      <form class="search-row" action="/posts">
+        <input type="text" name="tags" value="{{tags}}" list="datalist" 
+          oninput="tagComplete(this.value).then( function(result) {
+            document.getElementById('datalist').innerHTML = result; 
+          })">
+
+        <datalist id="datalist">
+        </datalist>
 
         <label for="limit">Service:</label>
         <select name="service" id="service-select">

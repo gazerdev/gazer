@@ -4,6 +4,7 @@ import shutil
 import concurrent.futures
 import html
 import json
+import datetime
 
 from models import Posts, Base, Tag
 from models import session
@@ -45,6 +46,8 @@ class moebooru_base:
         filename = '{}.{}'.format(post.get('md5'), post.get('file_ext'))
         local_path = 'gazer/static/temp/{}'.format(filename)
         archive_path = 'gazer/static/dump/{}/{}/{}'.format(post.get('md5')[:2], post.get('md5')[2:4], filename)
+        parsed_date = datetime.datetime.fromtimestamp(post.get('created_at'))
+        parsed_date = int(parsed_date.strftime("%Y%m%d%H%M%S"))
 
         dd_tags = ddInterface.evaluate(local_path)
         dd_tags = ddInterface.union(tags=post.get('tags'), dd_tags=dd_tags)
@@ -59,7 +62,7 @@ class moebooru_base:
             dd_tags=dd_tags,
             rating=post.get('rating'),
             status=post.get('status'),
-            created_at=post.get('created_at'),
+            created_at=parsed_date,  # moebooru uses timestamps
             creator_id=post.get('creator_id')
             )
         session.add(new_post)

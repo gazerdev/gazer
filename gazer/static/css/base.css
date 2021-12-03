@@ -1,3 +1,6 @@
+/*
+Base template css
+*/
 body {
   background-color: #121212;
   color: #e6e6e6;
@@ -7,13 +10,9 @@ body {
   flex-direction: column;
   margin: 10;
 }
-#main {
-  display: flex;
-  flex: 1;
-}
-#main > tags
-{
-    flex: 0 0 20vw;
+
+.search-row {
+  margin-left: 10;
 }
 
 h1 {
@@ -35,28 +34,43 @@ a:link {
         color: #2d8653;
       }
 
+/*
+Individual post css
+*/
+.post-main {
+  display: flex;
+  flex: 1;
+}
+.post-main > tags
+{
+    flex: 0 0 20vw;
+    margin-left: 10px;
+}
+
+/*
+CSS for main posts grid interface
+*/
+
+.posts-container {
+  display: flex;
+  flex-direction: row;
+  flex-basis: content;
+}
+
+.navigation-button {
+  display: flex;
+  min-width: 50px;
+}
+
 .post-grid {
   display: flex;
+  flex: 2;
   flex-wrap: wrap;
-  padding: 5px;
+  /* padding: 5px; */
 }
 
 .post {
   margin: 10px;
 }
 
-.navigation-row {
-  display: flex;
-  flex: 1;
-}
-.prev-button {
-  margin-left: 20px;
-  font-weight: bold;
-  font-size: 20px
-}
-.next-button {
-  margin-left: auto;
-  margin-right: 20px;
-  font-weight: bold;
-  font-size: 20px;
-}
+
