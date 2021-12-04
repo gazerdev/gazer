@@ -41,7 +41,15 @@ class gelbooru_base:
 
         dd_tags = ddInterface.evaluate('gazer/static/temp/{}'.format(post.get('image')))
         dd_tags = ddInterface.union(tags=post.get('tags'), dd_tags=dd_tags)
-        parsed_date = parser.parse(post.get('created_at'))
+   
+        # handle annoying case that safebooru api does not return dates 
+        # by defaulting to present time if no date exists
+        created_date = post.get('created_at')
+        if created_date:
+            parsed_date = parser.parse(post.get('created_at'))
+        else:
+            parsed_date = datetime.datetime.now()
+        
         parsed_date = int(parsed_date.strftime("%Y%m%d%H%M%S"))
 
         new_post = Posts(
