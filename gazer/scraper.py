@@ -1,12 +1,12 @@
 import time, json, os
-from sources.gelbooru import gelbooru_api
-from sources.konachan import konachan_api
-from sources.lolibooru import lolibooru_api
-from sources.yandere import yandere_api
-from sources.safebooru import safebooru_api
+from gazer.sources.gelbooru import gelbooru_api
+from gazer.sources.konachan import konachan_api
+from gazer.sources.lolibooru import lolibooru_api
+from gazer.sources.yandere import yandere_api
+from gazer.sources.safebooru import safebooru_api
 
-from models import Posts, Tag, Base
-from models import session
+from gazer.models import Posts, Tag, Base
+from gazer.models import session
 
 status_data = {"active":True, "current_tags":None, "images_downloaded": 0, "finished":False}
 source_map = {gelbooru_api.source:gelbooru_api,

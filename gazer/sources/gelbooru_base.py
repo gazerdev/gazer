@@ -7,10 +7,10 @@ import json
 import datetime
 from dateutil import parser
 
-from models import Posts, Tag, Base
-from models import session
-from utilities import escapeString
-import ddInterface
+from gazer.models import Posts, Tag, Base
+from gazer.models import session
+from gazer.utilities import escapeString
+from gazer import ddInterface
 
 
 class gelbooru_base:

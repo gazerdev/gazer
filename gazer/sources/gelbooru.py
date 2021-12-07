@@ -1,4 +1,4 @@
-from sources.gelbooru_base import gelbooru_base
+from gazer.sources.gelbooru_base import gelbooru_base
 
 class gelbooru_api(gelbooru_base):
     '''

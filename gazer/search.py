@@ -1,14 +1,14 @@
 from sqlalchemy import desc
-from utilities import escapeString
+from gazer.utilities import escapeString
 
-from sources.gelbooru import gelbooru_api
-from sources.yandere import yandere_api
-from sources.konachan import konachan_api
-from sources.lolibooru import lolibooru_api
-from sources.safebooru import safebooru_api
+from gazer.sources.gelbooru import gelbooru_api
+from gazer.sources.yandere import yandere_api
+from gazer.sources.konachan import konachan_api
+from gazer.sources.lolibooru import lolibooru_api
+from gazer.sources.safebooru import safebooru_api
 
-from models import session
-from models import Posts, Tag, Base
+from gazer.models import session
+from gazer.models import Posts, Tag, Base
 
 def tagSearch(tags, limit=None, page=None, service=None, sort=None, dd_enabled=False):
     '''

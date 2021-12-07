@@ -4,6 +4,7 @@ gazer.egg-info/
 DeepDanbooru/
 build/
 *.pyc
+*.spec
 __pycache__/
 postdata.db
 dd_pretrained/

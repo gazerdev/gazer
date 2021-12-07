@@ -6,12 +6,12 @@ import html
 import json
 import datetime
 
-from models import Posts, Base, Tag
-from models import session
-from utilities import escapeString
-import ddInterface
+from gazer.models import Posts, Base, Tag
+from gazer.models import session
+from gazer.utilities import escapeString
+from gazer import ddInterface
 
-from sources.gelbooru import gelbooru_api
+from gazer.sources.gelbooru import gelbooru_api
 
 class moebooru_base:
     '''
@@ -65,7 +65,7 @@ class moebooru_base:
             created_at=parsed_date,  # moebooru uses timestamps
             creator_id=post.get('creator_id')
             )
-        session.add(new_post)
+        session.merge(new_post)
         session.commit()
 
         os.makedirs(os.path.dirname(archive_path), exist_ok=True)

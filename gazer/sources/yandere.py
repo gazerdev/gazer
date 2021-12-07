@@ -1,4 +1,4 @@
-from sources.moebooru_base import moebooru_base
+from gazer.sources.moebooru_base import moebooru_base
 
 class yandere_api(moebooru_base):
     '''

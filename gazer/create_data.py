@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 engine = create_engine('sqlite:///postdata.db')
 
-from models import Posts, Base
+from gazer.models import Posts, Base
 
 Base.metadata.create_all(engine)
 

@@ -3,8 +3,8 @@ import requests
 import os
 import shutil
 
-from sources.gelbooru_base import gelbooru_base
-from sources.gelbooru import gelbooru_api
+from gazer.sources.gelbooru_base import gelbooru_base
+from gazer.sources.gelbooru import gelbooru_api
 
 class safebooru_api(gelbooru_base):
     '''
