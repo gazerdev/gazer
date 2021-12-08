@@ -42,8 +42,9 @@ was just a personally curated booru with an easy way to browse and archive new i
 
 ## Running
 
-Code is still very experimental so I don't have a nice packaging solution ready,
-needs to be run from commandline and accessed via browser.
+Code is not fully tested and stable but can be installed and run as a python package,
+with provided docker image or pyinstaller binaries are available under releases for 
+windows and linux. 
 
 ### Linux/Unix/Mac
 Install any version of python3 then navigate to the gazer root directory and
@@ -52,7 +53,8 @@ run the following commands in your terminal client.
 python -m venv venv
 source venv/bin/activate
 python setup.py install
-python gazer
+pip install -r requirements.txt
+python run.py
 ```
 Open a browser and go to
 localhost:5000 or 127.0.0.1:5000
@@ -71,7 +73,8 @@ run the following commands in your terminal client.
 python -m venv venv
 .\venv\Scripts\activate
 python setup.py install
-python gazer
+pip install -r requirements.txt
+python run.py
 ```
 Open a browser and go to
 localhost:5000 or 127.0.0.1:5000
@@ -110,6 +113,4 @@ more tags and list a supported booru to download these images from as its source
 ```
 
 Scraper will attempt to download all images from the source that match your tags.
-The scraper will automatically start with gazer. If you update your tags in the config
-file while gazer is running or want to scrape any new images: go to 127.0.0.1:5000/scraper
-and press the 'restart' button.  
+If you update your tags in the config file while gazer is running or want to scrape any new images: go to 127.0.0.1:5000/scraper and press the 'restart' button.  
